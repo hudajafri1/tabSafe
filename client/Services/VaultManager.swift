@@ -35,7 +35,7 @@ final class VaultManager {
 
     //in memory copy of ALL app data --> private(set) means other files can READ vault
     //but only VaultManager can EDIT --> protects data from being changed elsewhere 
-    prive(set) var vault: VaultData
+    private(set) var vault: VaultData
     
     //init runs at app startup --> when VaultManager is created
     init() {
