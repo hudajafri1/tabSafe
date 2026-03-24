@@ -41,7 +41,7 @@ struct MedicationRecord: Codable, Identifiable {
     //question mark means optional 
     var purpose: String?
 
-    var notes: String? 
+    var notes: String? = nil
     let createdAt: Date
     var updatedAt: Date
 
