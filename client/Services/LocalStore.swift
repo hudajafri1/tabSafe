@@ -1,6 +1,6 @@
-/* LOCAL STORAGE ENCODING 
-
-function of LocalStore.swift: save and load the vault from the phone 
+/* LOCAL STORAGE ENCODING
+ 
+function of LocalStore.swift: save and load the vault from the phone
 --> currently, VaultData is all the data from the app in memory
 --> this script needs to save permanently (as bytes) and load when called upon later 
 
@@ -18,6 +18,7 @@ JSONEncoder and JSONDecoder work bc we used Codable as object type!
 */
 
 import Foundation
+
 import CryptoKit
 import CommonCrypto
 import Security
