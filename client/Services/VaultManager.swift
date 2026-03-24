@@ -29,7 +29,6 @@ EXAMPLE OF FLOW FOR VAULT MANAGER:
 
 
 final class VaultManager {
-
     //create a localstorage instance --> to read and write files onto disk
     private let store = LocalStore()
     private var key: SymmetricKey
