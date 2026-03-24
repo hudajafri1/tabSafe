@@ -5,25 +5,26 @@ This folder contains the client-side iOS app code for TabSafe.
 
 ## Folder structure 
 
-* Models/ — defining the shape of the data (how it is stored in the app, fields and types)
+## Models/ — defining the shape of the data (how it is stored in the app, fields and types)
 
-IntakeLog.swift --> used for time specific updates, logging time med was taken and supposed to be taken
-MedicationRecord.swift -->  name, dosage, frequency, purpose, etc
-Schedule.swift --> when taken vs scheduled time to be taken, reminder enabled and label optional
-VaultData.swift --> stores ALL user data to be saved as a JSON and encrypted as one block
+* IntakeLog.swift --> used for time specific updates, logging time med was taken and supposed to be taken
+* MedicationRecord.swift -->  name, dosage, frequency, purpose, etc
+* Schedule.swift --> when taken vs scheduled time to be taken, reminder enabled and label optional
+* VaultData.swift --> stores ALL user data to be saved as a JSON and encrypted as one block
 
-* Services/ — app logic aka storage, vault management, authorization and session login
+## Services/ — app logic aka storage, vault management, authorization and session login
 
-LocalStore.swift --> writes and reads JSON from disk
-VaultManager.swift --> manages vault updates/edits/deletions, and makes sure the memory is consistent w updates 
-AuthSessionManager.swift --> auto-lock (haven't started this yet)
+* LocalStore.swift --> writes and reads JSON from disk
+* VaultManager.swift --> manages vault updates/edits/deletions, and makes sure the memory is consistent w updates 
+* AuthSessionManager.swift --> auto-lock (haven't started this yet)
 
-* ViewModels/ — bridging UI and app logic 
+## ViewModels/ — bridging UI and app logic 
 
-Connects UI actions (button taps, form input) to services, prepares data to be displayed in views 
+* Connects UI actions (button taps, form input) to services, prepares data to be displayed in views 
 
-* Views/ — SwiftUI screens for frontend 
+## Views/ — SwiftUI screens for frontend 
 
+To be updated
 
 ## Current plan 
 1. Build local vault/data flow -- define models, implement local storage, implement vault logic 
