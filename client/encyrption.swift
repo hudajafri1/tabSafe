@@ -1,23 +1,3 @@
-/* LOCAL STORAGE ENCODING 
-
-function of LocalStore.swift: save and load the vault from the phone 
---> currently, VaultData is all the data from the app in memory
---> this script needs to save permanently (as bytes) and load when called upon later 
-
-SAVING:
-VaultData (swift object in mem) --> JSON (using JSONEncoder.encode()) --> JSON data (raw bytes) write to: fileURL) --> file on disk "vault.json"
-
-LOADING: 
-file on disk data(contentsOf:) --> raw JSON bytes --> JSONDecoder() --> VaultData swift object in memory 
-
-JSONEncoder and JSONDecoder work bc we used Codable as object type! 
-
-*****:ATER: encryption inserted between encoding and writing*****
-
-
-*/
-
-import Foundation
 import CryptoKit
 import CommonCrypto
 import Security
@@ -29,21 +9,12 @@ import Security
 //OS Keychain / Keystore integration for key storage
 //PIN-to-key derivation (PBKDF2 + salt) as fallback path
 
-struct EncryptedPayload: Codable { //encodes within message
+struct EncryptedPaylod: Codable { //encodes within message
     let ciphertext: Data //content
     let nonce: Data
     let tag: Data //AES-GCM
 }
 
-//note i only defined one error, more detailed ones to come!
-enum CryptoEngineError: Error {
-    case encryptionFailed
-    var errorDescription: String? {
-        switch self {
-        case .encryptionFailed: return "Encryption failed."
-        }
-    }
-}
 struct CryptoEngine {
     private static let keychainLabel = "com.tabsafe.vaultkey"
     //serialized to JSON, encrypts with AES-256-GCM, returns cipher+nonce+authTag
@@ -54,10 +25,10 @@ struct CryptoEngine {
         do {
             sealedBox = try AES.GCM.seal(plaintext, using: key, nonce: nonce)
         } catch {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error message here
         }
-        return EncryptedPayload(ciphertext: sealedBox.ciphertext, nonce: Data(nonce), tag: sealedBox.tag)
+        return EncryptedPaylod(ciphertext: sealedBox.ciphertext, nonce: Data(nonce), tag: sealedBox.tag)
         //note nonce is 12bytes and tag is 16bytes
     }
     //now decrypt
@@ -66,7 +37,7 @@ struct CryptoEngine {
         do {
             nonce = try AES.GCM.Nonce(data: payload.nonce)
         } catch {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error message here later
         }
         let sealedBox = try AES.GCM.SealedBox(
@@ -78,13 +49,13 @@ struct CryptoEngine {
         do {
             plaintext = try AES.GCM.open(sealedBox, using: key)
         } catch {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error message here
         }
         do {
             return try JSONDecoder().decode(type, from: plaintext)
         } catch {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error msg
         }
     }
@@ -110,7 +81,7 @@ struct CryptoEngine {
         SecItemDelete(query as CFDictionary)
         let status = SecItemAdd(query as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error here later
         }
     }
@@ -131,10 +102,10 @@ struct CryptoEngine {
         }
         guard status == errSecSuccess else {
             // add error msg here later
-            throw CryptoEngineError.encryptionFailed
+            continue
         }
         guard let keyData = result as? Data, keyData.count == 32 else {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error msg here
         }
         return SymmetricKey(data: keyData)
@@ -147,19 +118,19 @@ struct CryptoEngine {
             kSecAttrAccount as String: keychainLabel
         ]
         let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw CryptoEngineError.encryptionFailed
+        guard status == errSecSuccess || status == errSecItemNotFount else {
+            continue
             //add error message here
         }
     }
     //p2p , derived symmetric key
     static func deriveKey(fromPIN pin: String, salt: Data, iterations: Int = 100_000) throws -> SymmetricKey {
         guard salt.count >= 16, iterations>0 else {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error msg here later
         }
         guard let pinData = pin.data(using: .utf8) else {
-            throw CryptoEngineError.encryptionFailed
+            continue
             //add error msg later
         }
         var derivedKeyData = Data(count: 32) //256bits
@@ -179,7 +150,7 @@ struct CryptoEngine {
         }
         guard status == kCCSuccess else {
             //add error msg here
-            throw CryptoEngineError.encryptionFailed
+            continue
         }
         return SymmetricKey(data: derivedKeyData)
     }
@@ -191,57 +162,3 @@ struct CryptoEngine {
         } return salt
     }
 }
-
-
-//save and load entire vault to local storage
-final class LocalStore {
-
-    //name of file on device 
-    private let fileName = "vault.json"
-
-    //find full file path in the applcations documents directory
-    private var fileURL: URL {
-        //get the applications documents directory
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-
-        //add "vault.json" to directory path
-        return documentsDirectory.appendingPathComponent(fileName)
-    }
-
-    //save entire vault to disk --> asked claude to help me with this, had no idea what I was doing 
-    // here the _ sign means me dont need the label to call the function like vault: myVault, we can just save save(myVault)
-    //throws is to make it throw an error in case of failure  
-    func save(_ vault: VaultData, using key: SymmetricKey) throws {
-        let encoder = JSONEncoder()
-
-        // make JSON readable (for debugging)
-        encoder.outputFormatting = .prettyPrinted
-
-        //.iso 8601 standard for representing dates and times --> for consistency YYYYMMDD and 24 hour format 
-        encoder.dateEncodingStrategy = .iso8601
-
-
-        // writing the contents of data to the fileURL location 
-        // atomic is important for data integrity --> look into this later bc I'm confused about it 
-        let payload = try CryptoEngine.encrypt(vault, using: key)
-        let payloadData = try JSONEncoder().encode(payload)
-        try payloadData.write(to: fileURL, options: .atomic)
-    }
-
-    //read the data from the disk and convert it into usable VaultData object in mem
-    //load takes no params, might fail and throw an error, returns a VaultData object 
-    func load(using key: SymmetricKey) throws -> VaultData {
-
-        //check if a file exists using guard, if not, exit and return empty VaultData object 
-        guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            return VaultData()
-        }
-
-        //read raw data from file --> we now get raw bytes (json text)
-        let data = try Data(contentsOf: fileURL)
-
-        let payload = try JSONDecoder().decode(EncryptedPayload.self, from: data)
-        return try CryptoEngine.decrypt(payload, as: VaultData.self, using: key)
-    }
-}
-

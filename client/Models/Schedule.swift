@@ -16,8 +16,8 @@ Schedule has its own unique id --> id, but it ALSO points to medicationId to tel
 
 import Foundation 
 
-structure Schedule: Codable, Identifiable {
-    let id: UUID 
+struct Schedule: Codable, Identifiable {
+    let id: UUID
     //unique ID for schedule itself
      
     let medicationId: UUID 
@@ -63,7 +63,7 @@ structure Schedule: Codable, Identifiable {
 
         reminderLabel: String? = nil,
 
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
         updatedAt: Date = Date() 
     
     ) {

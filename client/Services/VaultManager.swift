@@ -32,6 +32,7 @@ final class VaultManager {
 
     //create a localstorage instance --> to read and write files onto disk
     private let store = LocalStore()
+    private var key: SymmetricKey
 
     //in memory copy of ALL app data --> private(set) means other files can READ vault
     //but only VaultManager can EDIT --> protects data from being changed elsewhere 
@@ -39,11 +40,17 @@ final class VaultManager {
     
     //init runs at app startup --> when VaultManager is created
     init() {
-        
+        if let existingKey = try? CryptoEngine.loadKeyFromKeychain() {
+            self.key = existingKey
+        } else {
+            let newKey = (try? CryptoEngine.generateVaultKey()) ?? SymmetricKey(size: .bits256)
+            try? CryptoEngine.saveKeyToKeychain(newKey)
+            self.key = newKey
+        }
         do {
 
             //try loading existing vault from disk
-            vault = try store.load()
+            vault = try store.load(using: key)
 
         } catch {
 
@@ -81,7 +88,7 @@ final class VaultManager {
         vault.medications.append(newMedication)
 
         //save updated vault to disk
-        persist
+        persist()
     }
 
     //to delete a medication 
@@ -124,10 +131,10 @@ final class VaultManager {
         )
 
         //add to vault's schedule data 
-        vault.schedules.append(newMedication)
+        vault.schedules.append(newSchedule)
 
         //save updated vault to disk
-        persist
+        persist()
     }
 
     //to delete a schedule 
@@ -173,7 +180,7 @@ final class VaultManager {
 
             //save the entire vault to disk via LocalStore
             //using store as define above, called the saved function defined in LocalStore
-            try store.save(vault)
+            try store.save(vault, using:key)
 
             print("Vault saved successfully!")
 
