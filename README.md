@@ -6,8 +6,8 @@ tabSafe follows a local focused design: health data is encrypted on the device, 
 # Repository Structure 
 * client/ — User facing application (UI, encryption, local storage, reminders)
 * server/ — Optional encrypted backup services
-* docs/ — Design Doc, threat model, usability and security research and notes
-* tests/ — Security testing 
+* expo-client/ - frontend implementation 
+* tests/ — Security testing (not sure if we're doing this?)
 
 # Details on how to run 
 fill this out later 
