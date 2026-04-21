@@ -1,3 +1,5 @@
+import { scheduleWebReminder } from "../logic/webReminderPopup";
+
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import InputField from "../components/InputField";
@@ -22,14 +24,16 @@ export default function ScheduleScreen({
   const handleSaveSchedule = async () => {
     if (!time.trim() || !recurrence.trim()) return;
 
-    await addSchedule({
+    const schedule = {
       id: Date.now().toString(),
       medicationName: medication.name,
       time,
       recurrence,
       reminderLabel,
       enabled: true,
-    });
+    };
+    await addSchedule(schedule);
+    await scheduleWebReminder(schedule); //the prompts the browser popup
 
     setSavedMessage("Reminder saved successfully.");
     setTime("");
