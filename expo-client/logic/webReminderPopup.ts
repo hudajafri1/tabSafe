@@ -1,109 +1,176 @@
-//got help from claude for some of this code, I've never used typescript before
-//NOTE: this is for the WEB BROWSER version
+// expo-client/logic/webReminderPopup.ts
 
-//handles asking permission  to show notifications 
-//parsing the time of notification into actual hours and minutes and calculating the delay from current time to reminder --> in 24 hour time 
-//sending the popup at the correct moment using setTimeout 
-
-//get schedule type so that typescript knows what the schedule object looks like 
 import { Schedule } from "../models/Schedule";
 
-//ask the user if we can show them notifications 
-//if true they said yes, false = no 
-export function requestPopupPermission(): Promise<boolean> {
-    return new Promise((resolve) => {
+type WebReminderCallback = (schedule: Schedule) => void;
 
-        //check if browser supports notifications 
-        if (!("Notification" in window)) {
-            console.warn("This browser does not support notifications");
-            resolve(false); //can't do notifs 
-            return;
-        }
-
-        //if user said yes before, no need to ask again 
-        if (Notification.permission === "granted") {
-            resolve(true);
-        } else { 
-            //ask user --> triggering an "allow notifs?" popup in browser
-            Notification.requestPermission().then((permission) => {
-                resolve(permission === "granted"); //true if they clicked allow
-            });
-        }
-    });
-}
-
-//now to actually schedule the reminder popup 
-//take schedule oject (medication name, etc)
-export type WebReminderDebugInfo = {
-    target: Date;
-    delayMs: number;
-    permission: NotificationPermission | "unsupported";
+type WebReminderResult = {
+  success: boolean;
+  permission: NotificationPermission;
+  target?: Date;
 };
 
-export async function scheduleWebReminder(schedule: Schedule): Promise<WebReminderDebugInfo | null> {
-    if (!schedule.enabled) return null;
+const activeReminderTimers = new Map<string, number>();
 
-    //check for permission
-    const granted = await requestPopupPermission();
-    if (!granted) {
-        console.warn("Notification permission not granted");
-        return {
-            target: new Date(),
-            delayMs: 0,
-            permission: ("Notification" in window ? Notification.permission : "unsupported"),
-        };
+function parseNextReminderDate(timeString: string): Date | null {
+  const input = timeString.trim();
+  const match = input.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+
+  if (!match) return null;
+
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const ampm = match[3].toUpperCase();
+
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+    return null;
+  }
+
+  if (ampm === "PM" && hour !== 12) hour += 12;
+  if (ampm === "AM" && hour === 12) hour = 0;
+
+  const now = new Date();
+  const target = new Date();
+
+  target.setHours(hour, minute, 0, 0);
+
+  // If time already passed today, schedule for tomorrow
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  return target;
+}
+
+export async function requestWebNotificationPermission(): Promise<NotificationPermission> {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    console.warn("[webReminderPopup] Browser notifications are not supported in this browser.");
+    return "denied";
+  }
+
+  console.log("[webReminderPopup] Current Notification.permission =", Notification.permission);
+
+  if (Notification.permission === "granted") {
+    return "granted";
+  }
+
+  if (Notification.permission === "denied") {
+    return "denied";
+  }
+
+  const result = await Notification.requestPermission();
+  console.log("[webReminderPopup] Permission request result =", result);
+  return result;
+}
+
+export async function scheduleWebReminder(
+  schedule: Schedule,
+  onReminderFire?: WebReminderCallback
+): Promise<WebReminderResult> {
+  const permission = await requestWebNotificationPermission();
+
+  if (permission === "denied") {
+    return {
+      success: false,
+      permission,
+    };
+  }
+
+  try {
+    const target = parseNextReminderDate((schedule as any).time);
+
+    if (!target) {
+      console.warn("[webReminderPopup] Could not parse reminder time:", (schedule as any).time);
+      return {
+        success: false,
+        permission,
+      };
     }
-    
 
-    //time is stored as a string, so we split it into pieces 
-    const [timePart, modifier] = schedule.time.split(" "); //timePart = "8:00", modifier "AM"
-    let [hours, minutes] = timePart.split(":").map(Number); //hours = 8, minutes = 0
-    
-    //convert to 24h 
-    if (modifier === "PM" && hours !== 12) hours += 12; //3pm becomes 15
-    if (modifier === "AM" && hours === 12) hours = 0; //12 AM becomes 00
+    const delayMs = target.getTime() - Date.now();
 
-    //get the current time 
-    const now = new Date();
+    console.log("[webReminderPopup] Scheduling reminder:", schedule);
+    console.log("[webReminderPopup] Target date =", target);
+    console.log("[webReminderPopup] Delay ms =", delayMs);
+    console.log("[webReminderPopup] Permission =", permission);
 
-    //set the target time as the time specified by user for reminder 
-    const target = new Date();
-    target.setHours(hours, minutes, 0, 0);
+    if (delayMs <= 0) {
+      console.warn("[webReminderPopup] Reminder time is in the past. Not scheduling.");
+      return {
+        success: false,
+        permission,
+      };
+    }
 
-    //if time has already passed today, set it for tmrw 
-    if (target <= now) target.setDate(target.getDate() + 1);
+    const scheduleId =
+      (schedule as any).id ??
+      `${target.getTime()}-${(schedule as any).medicationName ?? "reminder"}`;
 
-    //get number of miliseconds from current time to target time 
-    const delay = target.getTime() - now.getTime();
+    if (activeReminderTimers.has(scheduleId)) {
+      const oldTimer = activeReminderTimers.get(scheduleId)!;
+      clearTimeout(oldTimer);
+      activeReminderTimers.delete(scheduleId);
+    }
 
-    //use custom label if they set one, otherwise just the medication name
-    const label = schedule.reminderLabel || schedule.medicationName;
+    const timerId = window.setTimeout(() => {
+      console.log("[webReminderPopup] Reminder firing for schedule:", schedule);
 
-    console.log("[TabSafe] Web reminder scheduled", {
-        scheduleId: schedule.id,
-        time: schedule.time,
-        now: now.toISOString(),
-        target: target.toISOString(),
-        delayMs: delay,
-        permission: Notification.permission,
-    });
+      const privacyMode = (schedule as any).notificationPrivacyMode ?? "private";
 
-    //wait until target time, and then send notif popup
-    //using notification API 
-    setTimeout(() => {
-        console.log("[TabSafe] Web reminder firing", {
-            scheduleId: schedule.id,
-            at: new Date().toISOString(),
-        });
-        try {
-            new Notification("TabSafe reminder", {
-                body: `It's time: ${label}`,
-            });
-        } catch (error) {
-            console.warn("[TabSafe] Web notification failed", error);
-            alert(`TabSafe reminder: It's time: ${label}`);
+      const title =
+        privacyMode === "detailed" ? "Medication reminder" : "TabSafe reminder";
+
+      const body =
+        privacyMode === "detailed"
+          ? ((schedule as any).reminderLabel?.trim()
+              ? `It's time: ${(schedule as any).reminderLabel}`
+              : `It's time to take ${(schedule as any).medicationName}`)
+          : "It's time for your scheduled reminder.";
+
+      if (onReminderFire) {
+        onReminderFire(schedule);
+      }
+
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "granted") {
+          try {
+            const notif = new Notification(title, { body });
+            notif.onclick = () => {
+              window.focus();
+            };
+            console.log("[webReminderPopup] Browser notification created successfully.");
+          } catch (err) {
+            console.error("[webReminderPopup] Failed to create browser notification:", err);
+          }
+        } else {
+          console.warn("[webReminderPopup] Reminder fired but Notification.permission is not granted.");
         }
-    }, delay); //how long to wait in milliseconds 
+      }
 
-    return { target, delayMs: delay, permission: Notification.permission };
+      activeReminderTimers.delete(scheduleId);
+    }, delayMs);
+
+    activeReminderTimers.set(scheduleId, timerId);
+
+    return {
+      success: true,
+      permission,
+      target,
+    };
+  } catch (err) {
+    console.error("[webReminderPopup] Failed to schedule web reminder:", err);
+    return {
+      success: false,
+      permission,
+    };
+  }
+}
+
+export function cancelWebReminder(scheduleId: string) {
+  const timerId = activeReminderTimers.get(scheduleId);
+  if (timerId) {
+    clearTimeout(timerId);
+    activeReminderTimers.delete(scheduleId);
+    console.log("[webReminderPopup] Cancelled reminder:", scheduleId);
+  }
 }

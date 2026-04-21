@@ -1,7 +1,8 @@
 export type NotificationMode = "generic" | "user-labeled";
 
-export interface AppSettings {
-  notificationsMode: NotificationMode;
+export type AppSettings = {
   biometricEnabled: boolean;
-  backupEnabled: boolean;
-}
+  homeView: "private" | "detailed";
+  genericNotifications: boolean;
+  lockSensitiveContent: boolean;
+};

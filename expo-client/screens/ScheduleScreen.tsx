@@ -4,6 +4,8 @@ import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 import { Medication } from "../models/Medication";
 import { addSchedule } from "../logic/scheduleLogic";
+import { getSettings } from "../logic/settingsLogic";
+import { Schedule } from "../models/Schedule";
 import { scheduleWebReminder } from "../logic/webReminderPopup";
 import { scheduleDeviceReminder } from "../logic/notificationLogic";
 
@@ -25,7 +27,6 @@ export default function ScheduleScreen({
     const input = raw.trim();
     if (!input) return null;
 
-    // Accept "8:00 AM", "8:00AM", "08:00 am"
     const m = input.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
     if (!m) return null;
 
@@ -37,6 +38,38 @@ export default function ScheduleScreen({
     if (!Number.isFinite(mm) || mm < 0 || mm > 59) return null;
 
     return `${hh}:${String(mm).padStart(2, "0")} ${ap}`;
+  };
+
+  const handleTestBrowserNotification = async () => {
+    Alert.alert("Test button clicked");
+
+    if (Platform.OS !== "web") {
+      Alert.alert("Test only", "This test button is only for web.");
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      Alert.alert("Unsupported", "This browser does not support notifications.");
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    console.log("[test] Notification.permission =", permission);
+    Alert.alert("Permission", permission);
+
+    if (permission === "granted") {
+      try {
+        new Notification("TabSafe test", {
+          body: "If you can see this, browser notifications work.",
+        });
+        Alert.alert("Notification created");
+      } catch (err) {
+        console.error("[test] Failed to create notification:", err);
+        Alert.alert("Error", String(err));
+      }
+    } else {
+      Alert.alert("Notifications blocked", "Browser notifications are not allowed.");
+    }
   };
 
   const handleSaveSchedule = async () => {
@@ -51,34 +84,53 @@ export default function ScheduleScreen({
       return;
     }
 
-    const schedule = {
+    const settings = await getSettings();
+
+    const schedule: Schedule = {
       id: Date.now().toString(),
       medicationName: medication.name,
       time: normalizedTime,
       recurrence,
       reminderLabel,
       enabled: true,
+      notificationPrivacyMode:
+        settings.notificationsMode === "generic" ? "private" : "detailed",
     };
+
     const notificationId =
       Platform.OS === "web" ? null : await scheduleDeviceReminder(schedule);
+
     await addSchedule({
       ...schedule,
       notificationId: notificationId || undefined,
     });
+
     if (Platform.OS === "web") {
-      const info = await scheduleWebReminder(schedule); // triggers browser notification permission + popup
-      if (info?.permission === "denied") {
+      const info = await scheduleWebReminder(schedule);
+
+      if (!info) {
+        Alert.alert("Error", "Failed to schedule web reminder.");
+        return;
+      }
+
+      if (info.permission === "denied") {
         Alert.alert(
           "Notifications blocked",
           "Browser notifications are blocked for localhost. Please allow notifications in your browser settings."
         );
-      } else if (info?.target) {
+        return;
+      }
+
+      if (info.success && info.target) {
         setSavedMessage(`Reminder scheduled for ${info.target.toLocaleString()}`);
         setTime("");
         setRecurrence("");
         setReminderLabel("");
         return;
       }
+
+      Alert.alert("Error", "Could not schedule reminder.");
+      return;
     }
 
     setSavedMessage("Reminder saved successfully.");
@@ -113,6 +165,13 @@ export default function ScheduleScreen({
       />
 
       <PrimaryButton title="Save Reminder" onPress={handleSaveSchedule} />
+
+      {Platform.OS === "web" ? (
+        <PrimaryButton
+          title="Test Browser Notification"
+          onPress={handleTestBrowserNotification}
+        />
+      ) : null}
 
       {savedMessage ? <Text style={styles.savedText}>{savedMessage}</Text> : null}
 
