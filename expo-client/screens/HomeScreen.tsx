@@ -23,6 +23,44 @@ export default function HomeScreen({
 }: HomeScreenProps) {
   const hasMedications = savedMeds.length > 0;
 
+  const getMinutesUntil = (time: string): number | null => {
+    const parts = time.trim().split(/\s+/);
+    if (parts.length < 2) return null;
+    const timePart = parts[0];
+    const modifier = parts[1].toUpperCase();
+    if (modifier !== "AM" && modifier !== "PM") return null;
+
+    const [hhRaw, mmRaw] = timePart.split(":");
+    const hours12 = Number(hhRaw);
+    const minutes = Number(mmRaw);
+    if (!Number.isFinite(hours12) || !Number.isFinite(minutes)) return null;
+    if (hours12 < 1 || hours12 > 12) return null;
+    if (minutes < 0 || minutes > 59) return null;
+
+    let hours24 = hours12;
+    if (modifier === "PM" && hours24 !== 12) hours24 += 12;
+    if (modifier === "AM" && hours24 === 12) hours24 = 0;
+
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(hours24, minutes, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+
+    return Math.floor((target.getTime() - now.getTime()) / 60000);
+  };
+
+  const minutesUntil =
+    upcomingReminder && upcomingReminder.enabled
+      ? getMinutesUntil(upcomingReminder.time)
+      : null;
+
+  const showBanner =
+    upcomingReminder &&
+    upcomingReminder.enabled &&
+    minutesUntil !== null &&
+    minutesUntil >= 0 &&
+    minutesUntil <= 60;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>TabSafe</Text>
@@ -30,10 +68,16 @@ export default function HomeScreen({
         Private medication tracking, stored locally on your device
       </Text>
 
-      {upcomingReminder && upcomingReminder.enabled ? (
+      {showBanner ? (
         <View style={styles.bannerCard}>
           <View style={styles.bannerHeader}>
-            <Text style={styles.bannerTitle}>Almost time in 1 hour</Text>
+            <Text style={styles.bannerTitle}>
+              {minutesUntil === 0
+                ? "Almost time now"
+                : minutesUntil === 60
+                  ? "Almost time in 1 hour"
+                  : `Almost time in ${minutesUntil} min`}
+            </Text>
 
             <Pressable onPress={onDismissBanner}>
               <Text style={styles.dismissText}>Dismiss</Text>
