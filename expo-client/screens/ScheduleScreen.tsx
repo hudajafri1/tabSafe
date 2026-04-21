@@ -5,6 +5,7 @@ import PrimaryButton from "../components/PrimaryButton";
 import { Medication } from "../models/Medication";
 import { addSchedule } from "../logic/scheduleLogic";
 import { scheduleWebReminder } from "../logic/webReminderPopup";
+import { scheduleDeviceReminder } from "../logic/notificationLogic";
 
 type ScheduleScreenProps = {
   medication: Medication;
@@ -31,7 +32,12 @@ export default function ScheduleScreen({
       reminderLabel,
       enabled: true,
     };
-    await addSchedule(schedule);
+    const notificationId =
+      Platform.OS === "web" ? null : await scheduleDeviceReminder(schedule);
+    await addSchedule({
+      ...schedule,
+      notificationId: notificationId || undefined,
+    });
     if (Platform.OS === "web") {
       await scheduleWebReminder(schedule); // triggers browser notification permission + popup
     }

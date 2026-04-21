@@ -5,4 +5,5 @@ export interface Schedule {
   recurrence: string;
   reminderLabel?: string;
   enabled: boolean;
+  notificationId?: string;
 }

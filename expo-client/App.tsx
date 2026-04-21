@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Platform } from "react-native";
+import * as Notifications from "expo-notifications";
 import HomeScreen from "./screens/HomeScreen";
 import AddMedicationScreen from "./screens/AddMedicationScreen";
 import HistoryScreen from "./screens/HistoryScreen";
@@ -42,6 +44,24 @@ export default function App() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    const configureAndroidChannel = async () => {
+      if (Platform.OS !== "android") return;
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Default",
+        importance: Notifications.AndroidImportance.DEFAULT,
+      });
+    };
+
+    configureAndroidChannel();
+
     const fetchInitialData = async () => {
       const meds = await getMedications();
       setSavedMeds(meds);
