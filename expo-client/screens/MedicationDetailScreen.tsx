@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Pressable, Alert, Platform } from "react-native";
+import {StyleSheet, Text, View, Pressable, ScrollView, Platform, Alert,} from "react-native";
 import { Medication } from "../models/Medication";
 import { Schedule } from "../models/Schedule";
 import PrimaryButton from "../components/PrimaryButton";
@@ -88,7 +88,11 @@ export default function MedicationDetailScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>Medication Details</Text>
 
       <View style={styles.card}>
@@ -110,6 +114,7 @@ export default function MedicationDetailScreen({
       </View>
 
       <PrimaryButton title="Edit Medication" onPress={onEditMedication} />
+      <View style={styles.buttonSpacer} />
       <PrimaryButton title="Set Reminder" onPress={onSchedule} />
 
       <View style={styles.card}>
@@ -165,16 +170,18 @@ export default function MedicationDetailScreen({
       <Pressable style={styles.secondaryButton} onPress={onBack}>
         <Text style={styles.secondaryButtonText}>Back</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#F7FAFC",
-    padding: 24,
-    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -184,6 +191,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
+    width: "100%",
     backgroundColor: "#FFF",
     borderRadius: 16,
     padding: 20,
@@ -203,6 +211,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#1E3A5F",
+  },
+  buttonSpacer: {
+    height: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -275,6 +286,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   deleteButton: {
+    width: "100%",
     backgroundColor: "#FED7D7",
     paddingVertical: 14,
     borderRadius: 12,
@@ -287,6 +299,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   secondaryButton: {
+    width: "100%",
     backgroundColor: "#E2E8F0",
     paddingVertical: 14,
     borderRadius: 12,

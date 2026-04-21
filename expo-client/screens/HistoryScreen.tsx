@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, ScrollView } from "react-native";
 import TopNavTabs from "../components/TopNavTabs";
 import { Medication } from "../models/Medication";
 import MedicationCard from "../components/MedicationCard";
@@ -24,7 +24,10 @@ export default function HistoryScreen({
   onSelectMedication,
 }: HistoryScreenProps) {
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Medication History</Text>
       <Text style={styles.subtitle}>Starter list of saved medications</Text>
 
@@ -51,7 +54,7 @@ export default function HistoryScreen({
       <Pressable style={styles.secondaryButton} onPress={onBack}>
         <Text style={styles.secondaryButtonText}>Back</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -62,6 +65,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 60,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 32,
