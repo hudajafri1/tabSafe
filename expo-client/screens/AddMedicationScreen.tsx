@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import InputField from "../components/InputField";
+import TopNavTabs from "../components/TopNavTabs";
 
 type AddMedicationScreenProps = {
   onSave: (
@@ -11,11 +12,19 @@ type AddMedicationScreenProps = {
     notes: string
   ) => void;
   onBack: () => void;
+  onGoHome: () => void;
+  onGoAdd: () => void;
+  onGoHistory: () => void;
+  onGoSettings: () => void;
 };
 
 export default function AddMedicationScreen({
   onSave,
   onBack,
+  onGoHome,
+  onGoAdd,
+  onGoHistory,
+  onGoSettings,
 }: AddMedicationScreenProps) {
   const [medicationName, setMedicationName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -38,6 +47,14 @@ export default function AddMedicationScreen({
       <Text style={styles.subtitle}>
         Enter medication details below.
       </Text>
+
+      <TopNavTabs
+        activeTab="add"
+        onGoHome={onGoHome}
+        onGoAdd={onGoAdd}
+        onGoHistory={onGoHistory}
+        onGoSettings={onGoSettings}
+      />
 
       <InputField
         value={medicationName}
@@ -77,8 +94,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7FAFC",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,

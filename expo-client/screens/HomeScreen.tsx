@@ -1,10 +1,12 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
+import TopNavTabs from "../components/TopNavTabs";
 import { Medication } from "../models/Medication";
 import { Schedule } from "../models/Schedule";
 
 type HomeScreenProps = {
+  onGoHome: () => void;
   onAddMedication: () => void;
   onViewHistory: () => void;
   onViewSettings: () => void;
@@ -14,6 +16,7 @@ type HomeScreenProps = {
 };
 
 export default function HomeScreen({
+  onGoHome,
   onAddMedication,
   onViewHistory,
   onViewSettings,
@@ -26,6 +29,7 @@ export default function HomeScreen({
   const getMinutesUntil = (time: string): number | null => {
     const parts = time.trim().split(/\s+/);
     if (parts.length < 2) return null;
+
     const timePart = parts[0];
     const modifier = parts[1].toUpperCase();
     if (modifier !== "AM" && modifier !== "PM") return null;
@@ -33,6 +37,7 @@ export default function HomeScreen({
     const [hhRaw, mmRaw] = timePart.split(":");
     const hours12 = Number(hhRaw);
     const minutes = Number(mmRaw);
+
     if (!Number.isFinite(hours12) || !Number.isFinite(minutes)) return null;
     if (hours12 < 1 || hours12 > 12) return null;
     if (minutes < 0 || minutes > 59) return null;
@@ -68,6 +73,14 @@ export default function HomeScreen({
         Private medication tracking, stored locally on your device
       </Text>
 
+      <TopNavTabs
+        activeTab="home"
+        onGoHome={onGoHome}
+        onGoAdd={onAddMedication}
+        onGoHistory={onViewHistory}
+        onGoSettings={onViewSettings}
+      />
+
       {showBanner ? (
         <View style={styles.bannerCard}>
           <View style={styles.bannerHeader}>
@@ -96,8 +109,9 @@ export default function HomeScreen({
       <View style={styles.heroCard}>
         <Text style={styles.heroTitle}>Privacy-First Dashboard</Text>
         <Text style={styles.heroText}>
-          TabSafe is designed to keep medication information private by avoiding
-          unnecessary exposure on the main screen.
+          TabSafe keeps medication details off the home screen to reduce
+          accidental exposure while still making reminders and navigation easy to
+          access.
         </Text>
       </View>
 
@@ -117,29 +131,13 @@ export default function HomeScreen({
         <View style={styles.emptyStateCard}>
           <Text style={styles.emptyStateTitle}>No medications added yet</Text>
           <Text style={styles.emptyStateText}>
-            Start by adding your first medication. Details will stay off the
+            Start by adding your first medication. Details stay off the
             dashboard to reduce accidental exposure.
           </Text>
         </View>
-      ) : (
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Privacy Notice</Text>
-          <Text style={styles.infoText}>
-            Medication details are intentionally not shown on the home screen.
-            Use History or Details only when needed.
-          </Text>
-        </View>
-      )}
+      ) : null}
 
       <PrimaryButton title="Add Medication" onPress={onAddMedication} />
-
-      <Pressable style={styles.secondaryButton} onPress={onViewHistory}>
-        <Text style={styles.secondaryButtonText}>View History</Text>
-      </Pressable>
-
-      <Pressable style={styles.secondaryButton} onPress={onViewSettings}>
-        <Text style={styles.secondaryButtonText}>Settings</Text>
-      </Pressable>
     </View>
   );
 }
@@ -149,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7FAFC",
     padding: 24,
-    justifyContent: "center",
+    paddingTop: 60,
   },
   title: {
     fontSize: 36,
@@ -260,37 +258,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A5568",
     lineHeight: 22,
-  },
-  infoCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1E3A5F",
-    marginBottom: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#4A5568",
-    lineHeight: 22,
-  },
-  secondaryButton: {
-    width: "100%",
-    backgroundColor: "#E2E8F0",
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 12,
-  },
-  secondaryButtonText: {
-    color: "#1E3A5F",
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });

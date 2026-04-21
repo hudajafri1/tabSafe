@@ -187,8 +187,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7FAFC",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,

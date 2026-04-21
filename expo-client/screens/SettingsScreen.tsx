@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
+import TopNavTabs from "../components/TopNavTabs";
 import { AppSettings } from "../models/Settings";
 import { getSettings, updateSettings } from "../logic/settingsLogic";
 
 type SettingsScreenProps = {
   onBack: () => void;
+  onGoHome: () => void;
+  onGoAdd: () => void;
+  onGoHistory: () => void;
+  onGoSettings: () => void;
 };
 
-export default function SettingsScreen({ onBack }: SettingsScreenProps) {
+export default function SettingsScreen({
+  onBack,
+  onGoHome,
+  onGoAdd,
+  onGoHistory,
+  onGoSettings,
+}: SettingsScreenProps) {
   const [settings, setSettings] = useState<AppSettings | null>(null);
 
   useEffect(() => {
@@ -65,6 +76,14 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
         Privacy and security settings for TabSafe
       </Text>
 
+      <TopNavTabs
+        activeTab="settings"
+        onGoHome={onGoHome}
+        onGoAdd={onGoAdd}
+        onGoHistory={onGoHistory}
+        onGoSettings={onGoSettings}
+      />
+
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Notification Privacy</Text>
         <Text style={styles.sectionText}>
@@ -113,8 +132,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7FAFC",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,

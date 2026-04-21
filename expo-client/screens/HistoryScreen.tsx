@@ -1,25 +1,40 @@
 import React from "react";
 import { StyleSheet, Text, View, Pressable } from "react-native";
+import TopNavTabs from "../components/TopNavTabs";
 import { Medication } from "../models/Medication";
 import MedicationCard from "../components/MedicationCard";
 
 type HistoryScreenProps = {
   savedMeds: Medication[];
   onBack: () => void;
+  onGoHome: () => void;
+  onGoAdd: () => void;
+  onGoHistory: () => void;
+  onGoSettings: () => void;
   onSelectMedication: (medication: Medication) => void;
 };
 
 export default function HistoryScreen({
   savedMeds,
   onBack,
+  onGoHome,
+  onGoAdd,
+  onGoHistory,
+  onGoSettings,
   onSelectMedication,
 }: HistoryScreenProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Medication History</Text>
-      <Text style={styles.subtitle}>
-        Starter list of saved medications
-      </Text>
+      <Text style={styles.subtitle}>Starter list of saved medications</Text>
+
+      <TopNavTabs
+        activeTab="history"
+        onGoHome={onGoHome}
+        onGoAdd={onGoAdd}
+        onGoHistory={onGoHistory}
+        onGoSettings={onGoSettings}
+      />
 
       <View style={styles.card}>
         {savedMeds.length === 0 ? (
@@ -45,8 +60,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F7FAFC",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 60,
   },
   title: {
     fontSize: 32,

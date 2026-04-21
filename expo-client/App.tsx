@@ -137,6 +137,10 @@ export default function App() {
       <AddMedicationScreen
         onSave={handleSaveMedication}
         onBack={() => setCurrentScreen("home")}
+        onGoHome={() => setCurrentScreen("home")}
+        onGoAdd={() => setCurrentScreen("addMedication")}
+        onGoHistory={() => setCurrentScreen("history")}
+        onGoSettings={() => setCurrentScreen("settings")}
       />
     );
   }
@@ -146,6 +150,10 @@ export default function App() {
       <HistoryScreen
         savedMeds={savedMeds}
         onBack={() => setCurrentScreen("home")}
+        onGoHome={() => setCurrentScreen("home")}
+        onGoAdd={() => setCurrentScreen("addMedication")}
+        onGoHistory={() => setCurrentScreen("history")}
+        onGoSettings={() => setCurrentScreen("settings")}
         onSelectMedication={(med) => {
           setSelectedMed(med);
           setCurrentScreen("detail");
@@ -205,11 +213,20 @@ export default function App() {
   }
 
   if (currentScreen === "settings") {
-    return <SettingsScreen onBack={() => setCurrentScreen("home")} />;
+    return (
+      <SettingsScreen
+        onBack={() => setCurrentScreen("home")}
+        onGoHome={() => setCurrentScreen("home")}
+        onGoAdd={() => setCurrentScreen("addMedication")}
+        onGoHistory={() => setCurrentScreen("history")}
+        onGoSettings={() => setCurrentScreen("settings")}
+      />
+    );
   }
 
   return (
     <HomeScreen
+      onGoHome={() => setCurrentScreen("home")}
       onAddMedication={() => setCurrentScreen("addMedication")}
       onViewHistory={() => setCurrentScreen("history")}
       onViewSettings={() => setCurrentScreen("settings")}
