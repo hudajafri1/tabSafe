@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Pressable, Platform } from "react-native";
+import { StyleSheet, Text, View, Pressable, Platform, Alert } from "react-native";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 import { Medication } from "../models/Medication";
@@ -21,13 +21,40 @@ export default function ScheduleScreen({
   const [reminderLabel, setReminderLabel] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
 
+  const normalizeTime = (raw: string): string | null => {
+    const input = raw.trim();
+    if (!input) return null;
+
+    // Accept "8:00 AM", "8:00AM", "08:00 am"
+    const m = input.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
+    if (!m) return null;
+
+    const hh = Number(m[1]);
+    const mm = Number(m[2]);
+    const ap = m[3].toUpperCase();
+
+    if (!Number.isFinite(hh) || hh < 1 || hh > 12) return null;
+    if (!Number.isFinite(mm) || mm < 0 || mm > 59) return null;
+
+    return `${hh}:${String(mm).padStart(2, "0")} ${ap}`;
+  };
+
   const handleSaveSchedule = async () => {
     if (!time.trim() || !recurrence.trim()) return;
+
+    const normalizedTime = normalizeTime(time);
+    if (!normalizedTime) {
+      Alert.alert(
+        "Invalid time format",
+        'Please enter time like "8:00 AM" (with AM/PM).'
+      );
+      return;
+    }
 
     const schedule = {
       id: Date.now().toString(),
       medicationName: medication.name,
-      time,
+      time: normalizedTime,
       recurrence,
       reminderLabel,
       enabled: true,
@@ -39,7 +66,19 @@ export default function ScheduleScreen({
       notificationId: notificationId || undefined,
     });
     if (Platform.OS === "web") {
-      await scheduleWebReminder(schedule); // triggers browser notification permission + popup
+      const info = await scheduleWebReminder(schedule); // triggers browser notification permission + popup
+      if (info?.permission === "denied") {
+        Alert.alert(
+          "Notifications blocked",
+          "Browser notifications are blocked for localhost. Please allow notifications in your browser settings."
+        );
+      } else if (info?.target) {
+        setSavedMessage(`Reminder scheduled for ${info.target.toLocaleString()}`);
+        setTime("");
+        setRecurrence("");
+        setReminderLabel("");
+        return;
+      }
     }
 
     setSavedMessage("Reminder saved successfully.");

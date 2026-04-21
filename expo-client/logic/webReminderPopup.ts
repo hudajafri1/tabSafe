@@ -34,14 +34,24 @@ export function requestPopupPermission(): Promise<boolean> {
 
 //now to actually schedule the reminder popup 
 //take schedule oject (medication name, etc)
-export async function scheduleWebReminder(schedule: Schedule): Promise<void> {
-    if (!schedule.enabled) return;
+export type WebReminderDebugInfo = {
+    target: Date;
+    delayMs: number;
+    permission: NotificationPermission | "unsupported";
+};
+
+export async function scheduleWebReminder(schedule: Schedule): Promise<WebReminderDebugInfo | null> {
+    if (!schedule.enabled) return null;
 
     //check for permission
     const granted = await requestPopupPermission();
     if (!granted) {
         console.warn("Notification permission not granted");
-        return;
+        return {
+            target: new Date(),
+            delayMs: 0,
+            permission: ("Notification" in window ? Notification.permission : "unsupported"),
+        };
     }
     
 
@@ -69,12 +79,31 @@ export async function scheduleWebReminder(schedule: Schedule): Promise<void> {
     //use custom label if they set one, otherwise just the medication name
     const label = schedule.reminderLabel || schedule.medicationName;
 
+    console.log("[TabSafe] Web reminder scheduled", {
+        scheduleId: schedule.id,
+        time: schedule.time,
+        now: now.toISOString(),
+        target: target.toISOString(),
+        delayMs: delay,
+        permission: Notification.permission,
+    });
+
     //wait until target time, and then send notif popup
     //using notification API 
     setTimeout(() => {
-        new Notification("TabSafe reminder", {
-            body: `It's time: ${label}`,
-            icon: "/assets/icon.png", //icon shown next to popup
+        console.log("[TabSafe] Web reminder firing", {
+            scheduleId: schedule.id,
+            at: new Date().toISOString(),
         });
+        try {
+            new Notification("TabSafe reminder", {
+                body: `It's time: ${label}`,
+            });
+        } catch (error) {
+            console.warn("[TabSafe] Web notification failed", error);
+            alert(`TabSafe reminder: It's time: ${label}`);
+        }
     }, delay); //how long to wait in milliseconds 
+
+    return { target, delayMs: delay, permission: Notification.permission };
 }
