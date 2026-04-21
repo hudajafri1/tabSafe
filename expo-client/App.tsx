@@ -10,6 +10,7 @@ import ScheduleScreen from "./screens/ScheduleScreen";
 import UnlockScreen from "./screens/UnlockScreen";
 import EditMedicationScreen from "./screens/EditMedicationScreen";
 import EditScheduleScreen from "./screens/EditScheduleScreen";
+import PrivacyAwayGuard from "./components/PrivacyAwayGuard";
 import { Medication } from "./models/Medication";
 import { Schedule } from "./models/Schedule";
 import {
@@ -128,111 +129,115 @@ export default function App() {
     setCurrentScreen("detail");
   };
 
-  if (currentScreen === "unlock") {
-    return <UnlockScreen onUnlock={() => setCurrentScreen("home")} />;
-  }
+  const renderCurrentScreen = () => {
+    if (currentScreen === "unlock") {
+      return <UnlockScreen onUnlock={() => setCurrentScreen("home")} />;
+    }
 
-  if (currentScreen === "addMedication") {
+    if (currentScreen === "addMedication") {
+      return (
+        <AddMedicationScreen
+          onSave={handleSaveMedication}
+          onBack={() => setCurrentScreen("home")}
+          onGoHome={() => setCurrentScreen("home")}
+          onGoAdd={() => setCurrentScreen("addMedication")}
+          onGoHistory={() => setCurrentScreen("history")}
+          onGoSettings={() => setCurrentScreen("settings")}
+        />
+      );
+    }
+
+    if (currentScreen === "history") {
+      return (
+        <HistoryScreen
+          savedMeds={savedMeds}
+          onBack={() => setCurrentScreen("home")}
+          onGoHome={() => setCurrentScreen("home")}
+          onGoAdd={() => setCurrentScreen("addMedication")}
+          onGoHistory={() => setCurrentScreen("history")}
+          onGoSettings={() => setCurrentScreen("settings")}
+          onSelectMedication={(med) => {
+            setSelectedMed(med);
+            setCurrentScreen("detail");
+          }}
+        />
+      );
+    }
+
+    if (currentScreen === "editMedication" && selectedMed) {
+      return (
+        <EditMedicationScreen
+          medication={selectedMed}
+          onSave={handleUpdateMedication}
+          onBack={() => setCurrentScreen("detail")}
+        />
+      );
+    }
+
+    if (currentScreen === "detail" && selectedMed) {
+      return (
+        <MedicationDetailScreen
+          medication={selectedMed}
+          onBack={() => setCurrentScreen("history")}
+          onDelete={handleDeleteMedication}
+          onEditMedication={() => setCurrentScreen("editMedication")}
+          onEditSchedule={(schedule) => {
+            setSelectedSchedule(schedule);
+            setCurrentScreen("editSchedule");
+          }}
+          onSchedule={() => setCurrentScreen("schedule")}
+          refreshKey={scheduleRefreshKey}
+        />
+      );
+    }
+
+    if (currentScreen === "editSchedule" && selectedSchedule) {
+      return (
+        <EditScheduleScreen
+          schedule={selectedSchedule}
+          onSave={handleUpdateSchedule}
+          onBack={() => setCurrentScreen("detail")}
+        />
+      );
+    }
+
+    if (currentScreen === "schedule" && selectedMed) {
+      return (
+        <ScheduleScreen
+          medication={selectedMed}
+          onBack={async () => {
+            setScheduleRefreshKey((prev) => prev + 1);
+            await refreshReminderBanner();
+            setCurrentScreen("detail");
+          }}
+        />
+      );
+    }
+
+    if (currentScreen === "settings") {
+      return (
+        <SettingsScreen
+          onBack={() => setCurrentScreen("home")}
+          onGoHome={() => setCurrentScreen("home")}
+          onGoAdd={() => setCurrentScreen("addMedication")}
+          onGoHistory={() => setCurrentScreen("history")}
+          onGoSettings={() => setCurrentScreen("settings")}
+        />
+      );
+    }
+
     return (
-      <AddMedicationScreen
-        onSave={handleSaveMedication}
-        onBack={() => setCurrentScreen("home")}
+      <HomeScreen
         onGoHome={() => setCurrentScreen("home")}
-        onGoAdd={() => setCurrentScreen("addMedication")}
-        onGoHistory={() => setCurrentScreen("history")}
-        onGoSettings={() => setCurrentScreen("settings")}
-      />
-    );
-  }
-
-  if (currentScreen === "history") {
-    return (
-      <HistoryScreen
+        onAddMedication={() => setCurrentScreen("addMedication")}
+        onViewHistory={() => setCurrentScreen("history")}
+        onViewSettings={() => setCurrentScreen("settings")}
+        onDismissBanner={() => setBannerDismissed(true)}
         savedMeds={savedMeds}
-        onBack={() => setCurrentScreen("home")}
-        onGoHome={() => setCurrentScreen("home")}
-        onGoAdd={() => setCurrentScreen("addMedication")}
-        onGoHistory={() => setCurrentScreen("history")}
-        onGoSettings={() => setCurrentScreen("settings")}
-        onSelectMedication={(med) => {
-          setSelectedMed(med);
-          setCurrentScreen("detail");
-        }}
+        upcomingReminder={bannerDismissed ? null : upcomingReminder}
       />
     );
-  }
+  };
 
-  if (currentScreen === "editMedication" && selectedMed) {
-    return (
-      <EditMedicationScreen
-        medication={selectedMed}
-        onSave={handleUpdateMedication}
-        onBack={() => setCurrentScreen("detail")}
-      />
-    );
-  }
-
-  if (currentScreen === "detail" && selectedMed) {
-    return (
-      <MedicationDetailScreen
-        medication={selectedMed}
-        onBack={() => setCurrentScreen("history")}
-        onDelete={handleDeleteMedication}
-        onEditMedication={() => setCurrentScreen("editMedication")}
-        onEditSchedule={(schedule) => {
-          setSelectedSchedule(schedule);
-          setCurrentScreen("editSchedule");
-        }}
-        onSchedule={() => setCurrentScreen("schedule")}
-        refreshKey={scheduleRefreshKey}
-      />
-    );
-  }
-
-  if (currentScreen === "editSchedule" && selectedSchedule) {
-    return (
-      <EditScheduleScreen
-        schedule={selectedSchedule}
-        onSave={handleUpdateSchedule}
-        onBack={() => setCurrentScreen("detail")}
-      />
-    );
-  }
-
-  if (currentScreen === "schedule" && selectedMed) {
-    return (
-      <ScheduleScreen
-        medication={selectedMed}
-        onBack={async () => {
-          setScheduleRefreshKey((prev) => prev + 1);
-          await refreshReminderBanner();
-          setCurrentScreen("detail");
-        }}
-      />
-    );
-  }
-
-  if (currentScreen === "settings") {
-    return (
-      <SettingsScreen
-        onBack={() => setCurrentScreen("home")}
-        onGoHome={() => setCurrentScreen("home")}
-        onGoAdd={() => setCurrentScreen("addMedication")}
-        onGoHistory={() => setCurrentScreen("history")}
-        onGoSettings={() => setCurrentScreen("settings")}
-      />
-    );
-  }
-
-  return (
-    <HomeScreen
-      onGoHome={() => setCurrentScreen("home")}
-      onAddMedication={() => setCurrentScreen("addMedication")}
-      onViewHistory={() => setCurrentScreen("history")}
-      onViewSettings={() => setCurrentScreen("settings")}
-      onDismissBanner={() => setBannerDismissed(true)}
-      savedMeds={savedMeds}
-      upcomingReminder={bannerDismissed ? null : upcomingReminder}
-    />
-  );
+  return <PrivacyAwayGuard>{renderCurrentScreen()}</PrivacyAwayGuard>;
 }

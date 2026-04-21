@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, ScrollView } from "react-native";
 import TopNavTabs from "../components/TopNavTabs";
 import { AppSettings } from "../models/Settings";
 import { getSettings, updateSettings } from "../logic/settingsLogic";
@@ -60,6 +60,15 @@ export default function SettingsScreen({
     setSettings(updated);
   };
 
+  const handleTogglePrivacyAway = async () => {
+    if (!settings) return;
+
+    const updated = await updateSettings({
+      privacyAwayEnabled: !settings.privacyAwayEnabled,
+    });
+    setSettings(updated);
+  };
+
   if (!settings) {
     return (
       <View style={styles.container}>
@@ -70,7 +79,10 @@ export default function SettingsScreen({
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Settings</Text>
       <Text style={styles.subtitle}>
         Privacy and security settings for TabSafe
@@ -99,6 +111,19 @@ export default function SettingsScreen({
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Privacy Away Mode</Text>
+        <Text style={styles.sectionText}>
+          {settings.privacyAwayEnabled
+            ? "Enabled: TabSafe covers the screen when you return after leaving the browser tab."
+            : "Disabled: TabSafe stays visible when you return to the browser tab."}
+        </Text>
+
+        <Pressable style={styles.optionButton} onPress={handleTogglePrivacyAway}>
+          <Text style={styles.optionButtonText}>Toggle Privacy Away Mode</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.card}>
         <Text style={styles.sectionTitle}>Authentication</Text>
         <Text style={styles.sectionText}>
           Biometrics: {settings.biometricEnabled ? "Enabled" : "Disabled"}
@@ -123,17 +148,18 @@ export default function SettingsScreen({
       <Pressable style={styles.secondaryButton} onPress={onBack}>
         <Text style={styles.secondaryButtonText}>Back</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#F7FAFC",
     alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 60,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 32,

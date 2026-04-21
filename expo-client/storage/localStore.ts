@@ -11,6 +11,7 @@ const EMPTY_VAULT: Vault = {
     notificationsMode: "generic",
     biometricEnabled: false,
     backupEnabled: false,
+    privacyAwayEnabled: true,
   },
 };
 

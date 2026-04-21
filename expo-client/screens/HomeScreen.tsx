@@ -1,9 +1,10 @@
-import React from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View, Pressable, Platform } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import TopNavTabs from "../components/TopNavTabs";
 import { Medication } from "../models/Medication";
 import { Schedule } from "../models/Schedule";
+import { getSettings } from "../logic/settingsLogic";
 
 type HomeScreenProps = {
   onGoHome: () => void;
@@ -122,8 +123,11 @@ export default function HomeScreen({
         </View>
 
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Home View</Text>
+          <Text style={styles.summaryLabel}>Privacy Mode</Text>
           <Text style={styles.summaryValue}>Private</Text>
+          <Text style={styles.summarySubtext}>
+            Medication details are hidden on the dashboard.
+          </Text>
         </View>
       </View>
 
@@ -240,6 +244,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1E3A5F",
   },
+  summarySubtext: {
+    fontSize: 12,
+    color: "#718096",
+    marginTop: 6,
+    lineHeight: 18,
+  },
   emptyStateCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
@@ -258,5 +268,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A5568",
     lineHeight: 22,
+  },
+  privacyOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#F7FAFC",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    zIndex: 100,
+  },
+  privacyOverlayTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1E3A5F",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  privacyOverlayText: {
+    fontSize: 15,
+    color: "#4A5568",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 18,
+  },
+  revealButton: {
+    backgroundColor: "#1E3A5F",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  revealButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
