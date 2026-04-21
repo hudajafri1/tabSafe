@@ -1,11 +1,10 @@
-import { scheduleWebReminder } from "../logic/webReminderPopup";
-
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, View, Pressable, Platform } from "react-native";
 import InputField from "../components/InputField";
 import PrimaryButton from "../components/PrimaryButton";
 import { Medication } from "../models/Medication";
 import { addSchedule } from "../logic/scheduleLogic";
+import { scheduleWebReminder } from "../logic/webReminderPopup";
 
 type ScheduleScreenProps = {
   medication: Medication;
@@ -33,7 +32,9 @@ export default function ScheduleScreen({
       enabled: true,
     };
     await addSchedule(schedule);
-    await scheduleWebReminder(schedule); //the prompts the browser popup
+    if (Platform.OS === "web") {
+      await scheduleWebReminder(schedule); // triggers browser notification permission + popup
+    }
 
     setSavedMessage("Reminder saved successfully.");
     setTime("");

@@ -35,6 +35,7 @@ export function requestPopupPermission(): Promise<boolean> {
 //now to actually schedule the reminder popup 
 //take schedule oject (medication name, etc)
 export async function scheduleWebReminder(schedule: Schedule): Promise<void> {
+    if (!schedule.enabled) return;
 
     //check for permission
     const granted = await requestPopupPermission();
@@ -72,7 +73,7 @@ export async function scheduleWebReminder(schedule: Schedule): Promise<void> {
     //using notification API 
     setTimeout(() => {
         new Notification("TabSafe reminder", {
-            body: 'Its time!', //defaul message in popup
+            body: `It's time: ${label}`,
             icon: "/assets/icon.png", //icon shown next to popup
         });
     }, delay); //how long to wait in milliseconds 

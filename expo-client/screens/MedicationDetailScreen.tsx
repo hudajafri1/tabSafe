@@ -110,7 +110,7 @@ export default function MedicationDetailScreen({
       </View>
 
       <PrimaryButton title="Edit Medication" onPress={onEditMedication} />
-      <PrimaryButton title="Schedule Reminder" onPress={onSchedule} />
+      <PrimaryButton title="Set Reminder" onPress={onSchedule} />
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Saved Reminders</Text>
