@@ -1,3 +1,5 @@
+# Dead Code - Kept this in here for proof of work but this whole folder is irrelevant now 
+
 # TabSafe Client
 
 ## Purpose 
