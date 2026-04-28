@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Pressable, ScrollView } from "react-native";
+import { StyleSheet, Text, View, Pressable, ScrollView, Switch } from "react-native";
 import TopNavTabs from "../components/TopNavTabs";
 import { AppSettings } from "../models/Settings";
 import { getSettings, updateSettings } from "../logic/settingsLogic";
 import PrimaryButton from "../components/PrimaryButton";
 
 type SettingsScreenProps = {
+  isDark: boolean;
+  setIsDark: (value: boolean) => void;
   onBack: () => void;
   onGoHome: () => void;
   onGoAdd: () => void;
@@ -15,6 +17,8 @@ type SettingsScreenProps = {
 };
 
 export default function SettingsScreen({
+  isDark,
+  setIsDark,
   onBack,
   onGoHome,
   onGoAdd,
@@ -40,6 +44,17 @@ export default function SettingsScreen({
       biometricEnabled: !settings.biometricEnabled,
     });
     setSettings(updated);
+  };
+
+  const handleToggleDarkMode = async () => {
+    if (!settings) return;
+
+    const updated = await updateSettings({
+      darkModeEnabled: !settings.darkModeEnabled,
+    });
+
+    setSettings(updated);
+    setIsDark(updated.darkModeEnabled ?? false);
   };
 
   const handleToggleBackup = async () => {
@@ -74,20 +89,27 @@ export default function SettingsScreen({
 
   if (!settings) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Loading settings...</Text>
+      <View style={[styles.container, { backgroundColor: isDark ? "#111827" : "#F7FAFC" }]}>
+        <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Settings</Text>
+        <Text style={[styles.subtitle, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>Loading settings...</Text>
       </View>
     );
   }
 
+
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: isDark ? "#111827" : "#F7FAFC" },
+      ]}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Settings</Text>
-      <Text style={styles.subtitle}>
+      <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>
+        Settings
+      </Text>
+
+      <Text style={[styles.subtitle, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
         Privacy and security settings for TabSafe
       </Text>
 
@@ -99,52 +121,97 @@ export default function SettingsScreen({
         onGoSettings={onGoSettings}
       />
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Notification Privacy</Text>
-        <Text style={styles.sectionText}>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>
+          Appearance
+        </Text>
+
+        <View style={styles.toggleRow}>
+          <Text style={[styles.sectionText, { color: isDark ? "#D1D5DB" : "#4A5568", marginBottom: 0 }]}>
+            {isDark ? "Dark Mode" : "Light Mode"}
+          </Text>
+
+          <Switch
+            value={settings.darkModeEnabled}
+            onValueChange={handleToggleDarkMode}
+          />
+        </View>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Notification Privacy</Text>
+        <Text style={[styles.sectionText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           Current mode:{" "}
           {settings.notificationsMode === "generic"
             ? "Generic reminders only"
             : "User-labeled reminders"}
         </Text>
 
-        <Pressable style={styles.optionButton} onPress={handleToggleNotificationMode}>
-          <Text style={styles.optionButtonText}>Toggle Notification Mode</Text>
+        <Pressable
+          style={[
+            styles.optionButton,
+            { backgroundColor: isDark ? "#334155" : "#DBEAFE" },
+          ]}
+          onPress={handleToggleNotificationMode}
+        >
+        {/*<Pressable style={styles.optionButton} onPress={handleToggleNotificationMode}>*/}
+          <Text style={[styles.optionButtonText, { color: isDark ? "#FFFFFF" : "#1D4ED8" }]}>Toggle Notification Mode</Text>
         </Pressable>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Privacy Away Mode</Text>
-        <Text style={styles.sectionText}>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Privacy Away Mode</Text>
+        <Text style={[styles.sectionText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           {settings.privacyAwayEnabled
             ? "Enabled: TabSafe covers the screen when you return after leaving the browser tab."
             : "Disabled: TabSafe stays visible when you return to the browser tab."}
         </Text>
 
-        <Pressable style={styles.optionButton} onPress={handleTogglePrivacyAway}>
-          <Text style={styles.optionButtonText}>Toggle Privacy Away Mode</Text>
+        <Pressable
+          style={[
+            styles.optionButton,
+            { backgroundColor: isDark ? "#334155" : "#DBEAFE" },
+          ]}
+          onPress={handleTogglePrivacyAway}
+        >
+        {/*<Pressable style={styles.optionButton} onPress={handleTogglePrivacyAway}>*/}
+          <Text style={[styles.optionButtonText, { color: isDark ? "#FFFFFF" : "#1D4ED8" }]}>Toggle Privacy Away Mode</Text>
         </Pressable>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Authentication</Text>
-        <Text style={styles.sectionText}>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Authentication</Text>
+        <Text style={[styles.sectionText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           Biometrics: {settings.biometricEnabled ? "Enabled" : "Disabled"}
         </Text>
 
-        <Pressable style={styles.optionButton} onPress={handleToggleBiometric}>
-          <Text style={styles.optionButtonText}>Toggle Biometrics</Text>
+        <Pressable
+          style={[
+            styles.optionButton,
+            { backgroundColor: isDark ? "#334155" : "#DBEAFE" },
+          ]}
+          onPress={handleToggleBiometric}
+        >
+        {/*<Pressable style={styles.optionButton} onPress={handleToggleBiometric}>*/}
+          <Text style={[styles.optionButtonText, { color: isDark ? "#FFFFFF" : "#1D4ED8" }]}>Toggle Biometrics</Text>
         </Pressable>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Backup</Text>
-        <Text style={styles.sectionText}>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Backup</Text>
+        <Text style={[styles.sectionText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           Backup mode: {settings.backupEnabled ? "Enabled" : "Disabled"}
         </Text>
 
-        <Pressable style={styles.optionButton} onPress={handleToggleBackup}>
-          <Text style={styles.optionButtonText}>Toggle Backup</Text>
+        <Pressable
+          style={[
+            styles.optionButton,
+            { backgroundColor: isDark ? "#334155" : "#DBEAFE" },
+          ]}
+          onPress={handleToggleBackup}
+        >
+        {/*<Pressable style={styles.optionButton} onPress={handleToggleBackup}>*/}
+          <Text style={[styles.optionButtonText, { color: isDark ? "#FFFFFF" : "#1D4ED8" }]}>Toggle Backup</Text>
         </Pressable>
       </View>
 
@@ -156,8 +223,16 @@ export default function SettingsScreen({
         />
       </View>
 
-      <Pressable style={styles.secondaryButton} onPress={onBack}>
-        <Text style={styles.secondaryButtonText}>Back</Text>
+      <Pressable
+        style={[
+          styles.secondaryButton,
+          { backgroundColor: isDark ? "#334155" : "#E2E8F0" },
+        ]}
+        onPress={onBack}
+      >
+        <Text style={[styles.secondaryButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>
+          Back
+        </Text>
       </Pressable>
     </ScrollView>
   );
@@ -231,5 +306,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     fontWeight: "600",
+  },
+  toggleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

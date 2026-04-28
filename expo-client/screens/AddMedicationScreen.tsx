@@ -5,6 +5,7 @@ import InputField from "../components/InputField";
 import TopNavTabs from "../components/TopNavTabs";
 
 type AddMedicationScreenProps = {
+  isDark: boolean;
   onSave: (
     name: string,
     dosage: string,
@@ -19,6 +20,7 @@ type AddMedicationScreenProps = {
 };
 
 export default function AddMedicationScreen({
+  isDark,
   onSave,
   onBack,
   onGoHome,
@@ -42,11 +44,9 @@ export default function AddMedicationScreen({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add Medication</Text>
-      <Text style={styles.subtitle}>
-        Enter medication details below.
-      </Text>
+    <View style={[styles.container, { backgroundColor: isDark ? "#111827" : "#F7FAFC" }]}>
+      <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Add Medication</Text>
+      <Text style={[styles.subtitle, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>Enter medication details below.</Text>
 
       <TopNavTabs
         activeTab="add"
@@ -56,34 +56,18 @@ export default function AddMedicationScreen({
         onGoSettings={onGoSettings}
       />
 
-      <InputField
-        value={medicationName}
-        onChangeText={setMedicationName}
-        placeholder="Medication name"
-      />
-
-      <InputField
-        value={dosage}
-        onChangeText={setDosage}
-        placeholder="Dosage"
-      />
-
-      <InputField
-        value={frequency}
-        onChangeText={setFrequency}
-        placeholder="Frequency (e.g. Daily)"
-      />
-
-      <InputField
-        value={notes}
-        onChangeText={setNotes}
-        placeholder="Notes (optional)"
-      />
+      <InputField value={medicationName} onChangeText={setMedicationName} placeholder="Medication name" />
+      <InputField value={dosage} onChangeText={setDosage} placeholder="Dosage" />
+      <InputField value={frequency} onChangeText={setFrequency} placeholder="Frequency (e.g. Daily)" />
+      <InputField value={notes} onChangeText={setNotes} placeholder="Notes (optional)" />
 
       <PrimaryButton title="Save Medication" onPress={handleSave} />
 
-      <Pressable style={styles.secondaryButton} onPress={onBack}>
-        <Text style={styles.secondaryButtonText}>Back</Text>
+      <Pressable
+        style={[styles.secondaryButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]}
+        onPress={onBack}
+      >
+        <Text style={[styles.secondaryButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Back</Text>
       </Pressable>
     </View>
   );
@@ -92,7 +76,6 @@ export default function AddMedicationScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7FAFC",
     alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 60,
@@ -100,24 +83,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "700",
-    color: "#1E3A5F",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#4A5568",
     marginBottom: 24,
     textAlign: "center",
   },
   secondaryButton: {
     width: "100%",
-    backgroundColor: "#E2E8F0",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 12,
   },
   secondaryButtonText: {
-    color: "#1E3A5F",
     textAlign: "center",
     fontSize: 16,
     fontWeight: "600",

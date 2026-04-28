@@ -5,4 +5,5 @@ export type AppSettings = {
   backupEnabled: boolean;
   notificationsMode: NotificationMode;
   privacyAwayEnabled: boolean;
+  darkModeEnabled: boolean;
 };

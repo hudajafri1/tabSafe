@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Pressable, Platform } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import TopNavTabs from "../components/TopNavTabs";
 import { Medication } from "../models/Medication";
 import { Schedule } from "../models/Schedule";
-import { getSettings } from "../logic/settingsLogic";
 
 type HomeScreenProps = {
+  isDark: boolean;
   onGoHome: () => void;
   onAddMedication: () => void;
   onViewHistory: () => void;
@@ -17,6 +17,7 @@ type HomeScreenProps = {
 };
 
 export default function HomeScreen({
+  isDark,
   onGoHome,
   onAddMedication,
   onViewHistory,
@@ -68,9 +69,9 @@ export default function HomeScreen({
     minutesUntil <= 60;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>TabSafe</Text>
-      <Text style={styles.subtitle}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#111827" : "#F7FAFC" }]}>
+      <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>TabSafe</Text>
+      <Text style={[styles.subtitle, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
         Private medication tracking, stored locally on your device
       </Text>
 
@@ -107,9 +108,9 @@ export default function HomeScreen({
         </View>
       ) : null}
 
-      <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>Privacy-First Dashboard</Text>
-        <Text style={styles.heroText}>
+      <View style={[styles.heroCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.heroTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Privacy-First Dashboard</Text>
+        <Text style={[styles.heroText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           TabSafe keeps medication details off the home screen to reduce
           accidental exposure while still making reminders and navigation easy to
           access.
@@ -117,24 +118,24 @@ export default function HomeScreen({
       </View>
 
       <View style={styles.summaryRow}>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Saved Medications</Text>
-          <Text style={styles.summaryValue}>{savedMeds.length}</Text>
+        <View style={[styles.summaryCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+          <Text style={[styles.summaryLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Saved Medications</Text>
+          <Text style={[styles.summaryValue, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{savedMeds.length}</Text>
         </View>
 
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Privacy Mode</Text>
-          <Text style={styles.summaryValue}>Private</Text>
-          <Text style={styles.summarySubtext}>
+        <View style={[styles.summaryCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+          <Text style={[styles.summaryLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Privacy Mode</Text>
+          <Text style={[styles.summaryValue, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Private</Text>
+          <Text style={[styles.summarySubtext, { color: isDark ? "#CBD5E1" : "#718096" }]}>
             Medication details are hidden on the dashboard.
           </Text>
         </View>
       </View>
 
       {!hasMedications ? (
-        <View style={styles.emptyStateCard}>
-          <Text style={styles.emptyStateTitle}>No medications added yet</Text>
-          <Text style={styles.emptyStateText}>
+        <View style={[styles.emptyStateCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E2E8F0" }]}>
+          <Text style={[styles.emptyStateTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>No medications added yet</Text>
+          <Text style={[styles.emptyStateText, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
             Start by adding your first medication. Details stay off the
             dashboard to reduce accidental exposure.
           </Text>

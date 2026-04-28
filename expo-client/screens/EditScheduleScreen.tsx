@@ -13,6 +13,7 @@ import PrimaryButton from "../components/PrimaryButton";
 import { Schedule } from "../models/Schedule";
 
 type EditScheduleScreenProps = {
+  isDark: boolean;
   schedule: Schedule;
   onSave: (scheduleId: string, updatedFields: Partial<Schedule>) => void;
   onBack: () => void;
@@ -67,6 +68,7 @@ function parseRecurrenceString(recurrence: string) {
 }
 
 export default function EditScheduleScreen({
+  isDark,
   schedule,
   onSave,
   onBack,
@@ -145,22 +147,22 @@ export default function EditScheduleScreen({
   return (
     <>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { backgroundColor: isDark ? "#111827" : "#F7FAFC" }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Edit Reminder</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Edit Reminder</Text>
+        <Text style={[styles.subtitle, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
           Update reminder details below.
         </Text>
 
-        <Text style={styles.sectionLabel}>Choose a time</Text>
-        <Pressable style={styles.timeTrigger} onPress={() => setShowTimeModal(true)}>
-          <Text style={styles.timeTriggerLabel}>Reminder time</Text>
-          <Text style={styles.timeTriggerValue}>{timeString}</Text>
+        <Text style={[styles.sectionLabel, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Choose a time</Text>
+        <Pressable style={[styles.timeTrigger, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E2E8F0" }]} onPress={() => setShowTimeModal(true)}>
+          <Text style={[styles.timeTriggerLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Reminder time</Text>
+          <Text style={[styles.timeTriggerValue, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{timeString}</Text>
         </Pressable>
 
-        <Text style={styles.sectionLabel}>Choose recurrence</Text>
+        <Text style={[styles.sectionLabel, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Choose recurrence</Text>
         <View style={styles.optionRow}>
           {recurrenceOptions.map((option) => {
             const isActive = recurrence === option;
@@ -169,6 +171,7 @@ export default function EditScheduleScreen({
                 key={option}
                 style={[
                   styles.optionChip,
+                  { backgroundColor: isDark ? "#334155" : "#E2E8F0" },
                   isActive && styles.optionChipActive,
                 ]}
                 onPress={() => handleSelectRecurrence(option)}
@@ -176,6 +179,7 @@ export default function EditScheduleScreen({
                 <Text
                   style={[
                     styles.optionChipText,
+                    { color: isDark ? "#FFFFFF" : "#1E3A5F" },
                     isActive && styles.optionChipTextActive,
                   ]}
                 >
@@ -187,9 +191,9 @@ export default function EditScheduleScreen({
         </View>
 
         {recurrence ? (
-          <View style={styles.selectionSummaryCard}>
-            <Text style={styles.selectionSummaryLabel}>Selected recurrence</Text>
-            <Text style={styles.selectionSummaryValue}>{recurrenceDisplay}</Text>
+          <View style={[styles.selectionSummaryCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF", borderColor: isDark ? "#334155" : "#E2E8F0" }]}>
+            <Text style={[styles.selectionSummaryLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Selected recurrence</Text>
+            <Text style={[styles.selectionSummaryValue, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{recurrenceDisplay}</Text>
           </View>
         ) : null}
 
@@ -201,8 +205,8 @@ export default function EditScheduleScreen({
 
         <PrimaryButton title="Save Changes" onPress={handleSave} />
 
-        <Pressable style={styles.secondaryButton} onPress={onBack}>
-          <Text style={styles.secondaryButtonText}>Back</Text>
+        <Pressable style={[styles.secondaryButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]} onPress={onBack}>
+          <Text style={[styles.secondaryButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Back</Text>
         </Pressable>
       </ScrollView>
 
@@ -213,12 +217,12 @@ export default function EditScheduleScreen({
         onRequestClose={() => setShowTimeModal(false)}
       >
         <View style={styles.modalBackdrop}>
-          <View style={styles.compactModalCard}>
-            <Text style={styles.modalTitle}>Choose Time</Text>
+          <View style={[styles.compactModalCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+            <Text style={[styles.modalTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Choose Time</Text>
 
             <View style={styles.compactWheelRow}>
               <View style={styles.compactWheelColumn}>
-                <Text style={styles.wheelLabel}>Hour</Text>
+                <Text style={[styles.wheelLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Hour</Text>
                 <ScrollView
                   style={styles.compactWheelList}
                   showsVerticalScrollIndicator={false}
@@ -228,6 +232,7 @@ export default function EditScheduleScreen({
                       key={hour}
                       style={[
                         styles.wheelItem,
+                        { backgroundColor: isDark ? "#334155" : "#F1F5F9" },
                         selectedHour === hour && styles.wheelItemActive,
                       ]}
                       onPress={() => setSelectedHour(hour)}
@@ -235,6 +240,7 @@ export default function EditScheduleScreen({
                       <Text
                         style={[
                           styles.wheelItemText,
+                          { color: isDark ? "#FFFFFF" : "#1E3A5F" },
                           selectedHour === hour && styles.wheelItemTextActive,
                         ]}
                       >
@@ -246,7 +252,7 @@ export default function EditScheduleScreen({
               </View>
 
               <View style={styles.compactWheelColumn}>
-                <Text style={styles.wheelLabel}>Min</Text>
+                <Text style={[styles.wheelLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>Min</Text>
                 <ScrollView
                   style={styles.compactWheelList}
                   showsVerticalScrollIndicator={false}
@@ -256,6 +262,7 @@ export default function EditScheduleScreen({
                       key={minute}
                       style={[
                         styles.wheelItem,
+                        { backgroundColor: isDark ? "#334155" : "#F1F5F9" },
                         selectedMinute === minute && styles.wheelItemActive,
                       ]}
                       onPress={() => setSelectedMinute(minute)}
@@ -263,6 +270,7 @@ export default function EditScheduleScreen({
                       <Text
                         style={[
                           styles.wheelItemText,
+                          { color: isDark ? "#FFFFFF" : "#1E3A5F" },
                           selectedMinute === minute && styles.wheelItemTextActive,
                         ]}
                       >
@@ -274,12 +282,13 @@ export default function EditScheduleScreen({
               </View>
 
               <View style={styles.periodColumnCompact}>
-                <Text style={styles.wheelLabel}>AM / PM</Text>
+                <Text style={[styles.wheelLabel, { color: isDark ? "#CBD5E1" : "#718096" }]}>AM / PM</Text>
                 {(["AM", "PM"] as const).map((period) => (
                   <Pressable
                     key={period}
                     style={[
                       styles.wheelItem,
+                      { backgroundColor: isDark ? "#334155" : "#F1F5F9" },
                       selectedPeriod === period && styles.wheelItemActive,
                     ]}
                     onPress={() => setSelectedPeriod(period)}
@@ -287,6 +296,7 @@ export default function EditScheduleScreen({
                     <Text
                       style={[
                         styles.wheelItemText,
+                        { color: isDark ? "#FFFFFF" : "#1E3A5F" },
                         selectedPeriod === period && styles.wheelItemTextActive,
                       ]}
                     >
@@ -298,10 +308,10 @@ export default function EditScheduleScreen({
             </View>
 
             <Pressable
-              style={styles.modalDoneButton}
+              style={[styles.modalDoneButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]}
               onPress={() => setShowTimeModal(false)}
             >
-              <Text style={styles.modalDoneButtonText}>Done</Text>
+              <Text style={[styles.modalDoneButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Done</Text>
             </Pressable>
           </View>
         </View>
@@ -314,9 +324,9 @@ export default function EditScheduleScreen({
         onRequestClose={() => setShowCustomDaysModal(false)}
       >
         <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Choose Custom Days</Text>
-            <Text style={{ fontSize: 12, color: "#718096", marginTop: -6, marginBottom: 14, textAlign: "center",}}>
+          <View style={[styles.modalCard, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+            <Text style={[styles.modalTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Choose Custom Days</Text>
+            <Text style={{ fontSize: 12, color: isDark ? "#CBD5E1" : "#718096", marginTop: -6, marginBottom: 14, textAlign: "center",}}>
               Select one or more days (e.g. Monday only = weekly)
             </Text>
 
@@ -328,6 +338,7 @@ export default function EditScheduleScreen({
                     key={day}
                     style={[
                       styles.dayChip,
+                      { backgroundColor: isDark ? "#334155" : "#E2E8F0" },
                       isSelected && styles.dayChipActive,
                     ]}
                     onPress={() => handleToggleCustomDay(day)}
@@ -335,6 +346,7 @@ export default function EditScheduleScreen({
                     <Text
                       style={[
                         styles.dayChipText,
+                        { color: isDark ? "#FFFFFF" : "#1E3A5F" },
                         isSelected && styles.dayChipTextActive,
                       ]}
                     >
@@ -346,10 +358,10 @@ export default function EditScheduleScreen({
             </View>
 
             <Pressable
-              style={styles.modalDoneButton}
+              style={[styles.modalDoneButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]}
               onPress={() => setShowCustomDaysModal(false)}
             >
-              <Text style={styles.modalDoneButtonText}>Done</Text>
+              <Text style={[styles.modalDoneButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Done</Text>
             </Pressable>
           </View>
         </View>

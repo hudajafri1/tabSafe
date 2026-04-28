@@ -23,6 +23,7 @@ import {
   updateSchedule,
   getUpcomingBannerReminder,
 } from "./logic/scheduleLogic";
+import { getSettings } from "./logic/settingsLogic";
 
 type Screen =
   | "unlock"
@@ -43,6 +44,21 @@ export default function App() {
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
   const [upcomingReminder, setUpcomingReminder] = useState<Schedule | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  const handleUnlock = async () => {
+    const settings = await getSettings();
+    setIsDark(settings.darkModeEnabled ?? false);
+
+    const meds = await getMedications();
+    setSavedMeds(meds);
+
+    const reminder = await getUpcomingBannerReminder();
+    setUpcomingReminder(reminder);
+    setBannerDismissed(false);
+
+    setCurrentScreen("home");
+  };
 
   const handleLogout = () => {
     //send the user back to the unlock screen
@@ -136,12 +152,13 @@ export default function App() {
 
   const renderCurrentScreen = () => {
     if (currentScreen === "unlock") {
-      return <UnlockScreen onUnlock={() => setCurrentScreen("home")} />;
+      return <UnlockScreen onUnlock={handleUnlock} />;
     }
 
     if (currentScreen === "addMedication") {
       return (
         <AddMedicationScreen
+          isDark={isDark}
           onSave={handleSaveMedication}
           onBack={() => setCurrentScreen("home")}
           onGoHome={() => setCurrentScreen("home")}
@@ -155,6 +172,7 @@ export default function App() {
     if (currentScreen === "history") {
       return (
         <HistoryScreen
+          isDark={isDark}
           savedMeds={savedMeds}
           onBack={() => setCurrentScreen("home")}
           onGoHome={() => setCurrentScreen("home")}
@@ -172,6 +190,7 @@ export default function App() {
     if (currentScreen === "editMedication" && selectedMed) {
       return (
         <EditMedicationScreen
+          isDark={isDark}
           medication={selectedMed}
           onSave={handleUpdateMedication}
           onBack={() => setCurrentScreen("detail")}
@@ -182,6 +201,7 @@ export default function App() {
     if (currentScreen === "detail" && selectedMed) {
       return (
         <MedicationDetailScreen
+          isDark={isDark}
           medication={selectedMed}
           onBack={() => setCurrentScreen("history")}
           onDelete={handleDeleteMedication}
@@ -199,6 +219,7 @@ export default function App() {
     if (currentScreen === "editSchedule" && selectedSchedule) {
       return (
         <EditScheduleScreen
+          isDark={isDark}
           schedule={selectedSchedule}
           onSave={handleUpdateSchedule}
           onBack={() => setCurrentScreen("detail")}
@@ -209,6 +230,7 @@ export default function App() {
     if (currentScreen === "schedule" && selectedMed) {
       return (
         <ScheduleScreen
+          isDark={isDark}
           medication={selectedMed}
           onBack={async () => {
             setScheduleRefreshKey((prev) => prev + 1);
@@ -222,6 +244,8 @@ export default function App() {
     if (currentScreen === "settings") {
       return (
         <SettingsScreen
+          isDark={isDark}
+          setIsDark={setIsDark}
           onBack={() => setCurrentScreen("home")}
           onGoHome={() => setCurrentScreen("home")}
           onGoAdd={() => setCurrentScreen("addMedication")}
@@ -234,6 +258,7 @@ export default function App() {
 
     return (
       <HomeScreen
+          isDark={isDark}
         onGoHome={() => setCurrentScreen("home")}
         onAddMedication={() => setCurrentScreen("addMedication")}
         onViewHistory={() => setCurrentScreen("history")}

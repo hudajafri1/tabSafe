@@ -24,6 +24,7 @@ const EMPTY_VAULT: Vault = {
     biometricEnabled: false,
     backupEnabled: false,
     privacyAwayEnabled: true,
+    darkModeEnabled: false,
   },
 };
 

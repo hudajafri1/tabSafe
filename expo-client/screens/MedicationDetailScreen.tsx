@@ -10,6 +10,7 @@ import {
 } from "../logic/scheduleLogic";
 
 type MedicationDetailScreenProps = {
+  isDark: boolean;
   medication: Medication;
   onBack: () => void;
   onDelete: () => void;
@@ -20,6 +21,7 @@ type MedicationDetailScreenProps = {
 };
 
 export default function MedicationDetailScreen({
+  isDark,
   medication,
   onBack,
   onDelete,
@@ -89,24 +91,24 @@ export default function MedicationDetailScreen({
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { backgroundColor: isDark ? "#111827" : "#F7FAFC" }]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.title}>Medication Details</Text>
+      <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Medication Details</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>Name</Text>
-        <Text style={styles.value}>{medication.name}</Text>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.label, { color: isDark ? "#CBD5E1" : "#718096" }]}>Name</Text>
+        <Text style={[styles.value, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{medication.name}</Text>
 
-        <Text style={styles.label}>Dosage</Text>
-        <Text style={styles.value}>{medication.dosage}</Text>
+        <Text style={[styles.label, { color: isDark ? "#CBD5E1" : "#718096" }]}>Dosage</Text>
+        <Text style={[styles.value, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{medication.dosage}</Text>
 
-        <Text style={styles.label}>Frequency</Text>
-        <Text style={styles.value}>{medication.frequency}</Text>
+        <Text style={[styles.label, { color: isDark ? "#CBD5E1" : "#718096" }]}>Frequency</Text>
+        <Text style={[styles.value, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{medication.frequency}</Text>
 
-        <Text style={styles.label}>Notes</Text>
-        <Text style={styles.value}>
+        <Text style={[styles.label, { color: isDark ? "#CBD5E1" : "#718096" }]}>Notes</Text>
+        <Text style={[styles.value, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>
           {medication.notes && medication.notes.trim().length > 0
             ? medication.notes
             : "No notes added."}
@@ -117,38 +119,38 @@ export default function MedicationDetailScreen({
       <View style={styles.buttonSpacer} />
       <PrimaryButton title="Set Reminder" onPress={onSchedule} />
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Saved Reminders</Text>
+      <View style={[styles.card, { backgroundColor: isDark ? "#1F2937" : "#FFFFFF" }]}>
+        <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Saved Reminders</Text>
 
         {schedules.length === 0 ? (
-          <Text style={styles.emptyText}>No reminders saved yet.</Text>
+          <Text style={[styles.emptyText, { color: isDark ? "#CBD5E1" : "#718096" }]}>No reminders saved yet.</Text>
         ) : (
           schedules.map((schedule) => (
-            <View key={schedule.id} style={styles.scheduleCard}>
-              <Text style={styles.scheduleTime}>{schedule.time}</Text>
-              <Text style={styles.scheduleMeta}>
+            <View key={schedule.id} style={[styles.scheduleCard, { borderColor: isDark ? "#334155" : "#E2E8F0" }]}>
+              <Text style={[styles.scheduleTime, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>{schedule.time}</Text>
+              <Text style={[styles.scheduleMeta, { color: isDark ? "#CBD5E1" : "#4A5568" }]}>
                 {schedule.recurrence}
                 {schedule.reminderLabel ? ` • ${schedule.reminderLabel}` : ""}
               </Text>
-              <Text style={styles.statusText}>
+              <Text style={[styles.statusText, { color: isDark ? "#CBD5E1" : "#718096" }]}>
                 Status: {schedule.enabled ? "Enabled" : "Disabled"}
               </Text>
 
               <View style={styles.scheduleButtonRow}>
                 <Pressable
-                  style={styles.smallBlueButton}
+                  style={[styles.smallBlueButton, { backgroundColor: isDark ? "#334155" : "#DBEAFE" }]}
                   onPress={() => handleToggleSchedule(schedule.id)}
                 >
-                  <Text style={styles.smallBlueButtonText}>
+                  <Text style={[styles.smallBlueButtonText, { color: isDark ? "#FFFFFF" : "#1D4ED8" }]}>
                     {schedule.enabled ? "Disable" : "Enable"}
                   </Text>
                 </Pressable>
 
                 <Pressable
-                  style={styles.smallGrayButton}
+                  style={[styles.smallGrayButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]}
                   onPress={() => onEditSchedule(schedule)}
                 >
-                  <Text style={styles.smallGrayButtonText}>Edit</Text>
+                  <Text style={[styles.smallGrayButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Edit</Text>
                 </Pressable>
 
                 <Pressable
@@ -167,8 +169,8 @@ export default function MedicationDetailScreen({
         <Text style={styles.deleteButtonText}>Delete Medication</Text>
       </Pressable>
 
-      <Pressable style={styles.secondaryButton} onPress={onBack}>
-        <Text style={styles.secondaryButtonText}>Back</Text>
+      <Pressable style={[styles.secondaryButton, { backgroundColor: isDark ? "#334155" : "#E2E8F0" }]} onPress={onBack}>
+        <Text style={[styles.secondaryButtonText, { color: isDark ? "#FFFFFF" : "#1E3A5F" }]}>Back</Text>
       </Pressable>
     </ScrollView>
   );
