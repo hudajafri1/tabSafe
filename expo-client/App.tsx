@@ -44,6 +44,11 @@ export default function App() {
   const [upcomingReminder, setUpcomingReminder] = useState<Schedule | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
+  const handleLogout = () => {
+    //send the user back to the unlock screen
+    setCurrentScreen("unlock");
+  };
+
   useEffect(() => {
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -222,6 +227,7 @@ export default function App() {
           onGoAdd={() => setCurrentScreen("addMedication")}
           onGoHistory={() => setCurrentScreen("history")}
           onGoSettings={() => setCurrentScreen("settings")}
+          onLogout={handleLogout}
         />
       );
     }

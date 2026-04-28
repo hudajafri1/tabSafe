@@ -12,11 +12,13 @@ type UnlockScreenProps = {
 
 export default function UnlockScreen({ onUnlock }: UnlockScreenProps) {
   const [storedPinExists, setStoredPinExists] = useState<boolean | null>(null);
+  const [isTypingNewPin, setIsTypingNewPin] = useState(false); 
+  const [isRecoveringPin, setIsRecoveringPin] = useState(false);
+
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState("");
   const [recoveryAnswer, setRecoveryAnswer] = useState("");
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [securityQuestion] = useState("What was the name of your first pet?");
 
   useEffect(() => {
@@ -28,20 +30,17 @@ export default function UnlockScreen({ onUnlock }: UnlockScreenProps) {
     checkPin();
   }, []);
 
-  //if pin is forgotten, we WIPE ALL DATA --> privacy over everything 
-  //pin recovery questions to be implemented soon 
   const handleResetVault = async () => {
     const message = "Resetting your PIN will permanently delete all your encrypted medication data to protect your privacy. " + 
     "Since we don't store your data on a server, this cannot be undone. " +
     "\n\nDo you want to clear the vault and create a new PIN?";
     
-    //check if we are on web or mobile for the confirmation dialog
-    const confirmed = window.confirm(message);
-
-    if (confirmed) {
+    if (window.confirm(message)) {
       try {
         await AsyncStorage.clear(); 
         setStoredPinExists(false);
+        setIsTypingNewPin(false);
+        setIsRecoveringPin(false);
         setPin("");
         setConfirmPin("");
         setError("");
@@ -78,18 +77,11 @@ export default function UnlockScreen({ onUnlock }: UnlockScreenProps) {
   };
 
   const handleUnlock = async () => {
-    if (!pin.trim()) {
-      setError("Please enter your PIN.");
-      return;
-    }
-
     const valid = await verifyPin(pin);
-
     if (!valid) {
       setError("Incorrect PIN.");
       return;
     }
-
     setError("");
     setSessionPin(pin);
     onUnlock();
@@ -103,7 +95,6 @@ export default function UnlockScreen({ onUnlock }: UnlockScreenProps) {
     const valid = await verifyRecoveryAnswer(recoveryAnswer);
     if (valid) {
       setError("");
-      // Use the answer as the temporary session key to unlock
       setSessionPin(recoveryAnswer.toLowerCase().trim());
       onUnlock();
     } else {
@@ -111,68 +102,84 @@ export default function UnlockScreen({ onUnlock }: UnlockScreenProps) {
     }
   };
 
-  if (storedPinExists === null) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>TabSafe</Text>
-        <Text style={styles.subtitle}>Loading security settings...</Text>
-      </View>
-    );
-  }
-
+  if (storedPinExists === null) return null;
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>TabSafe</Text>
-
+      
       <View style={styles.card}>
-      {!storedPinExists ? (
+        
+        {/* case 1: new user!! (no pin created previously) */}
 
-        //case 1: initializing the pin 
-        <>
-          <Text style={styles.sectionTitle}>Create PIN</Text>
-          <InputField value={pin} onChangeText={setPin} placeholder="Create PIN" secureTextEntry />
-          <InputField value={confirmPin} onChangeText={setConfirmPin} placeholder="Confirm PIN" secureTextEntry />
+        {!storedPinExists ? (
+          <>
+            {!isTypingNewPin ? (
+              <>
+                <Text style={styles.sectionTitle}>Welcome</Text>
+                <Text style={styles.infoText}>Set up a secure PIN to start tracking medications privately.</Text>
+                <PrimaryButton title="Create New Account" onPress={() => setIsTypingNewPin(true)} />
+              </>
+            ) : (
+              /* create PIN inputs */
+              <>
+                <Text style={styles.sectionTitle}>Create PIN</Text>
+                <InputField value={pin} onChangeText={setPin} placeholder="Create PIN" secureTextEntry />
+                <InputField value={confirmPin} onChangeText={setConfirmPin} placeholder="Confirm PIN" secureTextEntry />
 
-          <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Recovery Question</Text>
-          <Text style={styles.infoText}>{securityQuestion}</Text>
-          <InputField value={recoveryAnswer} onChangeText={setRecoveryAnswer} placeholder="Your Answer" />
+                <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Recovery Question</Text>
+                <Text style={styles.infoText}>{securityQuestion}</Text>
+                <InputField value={recoveryAnswer} onChangeText={setRecoveryAnswer} placeholder="Your Answer" />
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <PrimaryButton title="Save & Protect Vault" onPress={handleCreatePin} />
-        </>
-      ) : isRecoveryMode ? (
-        //case 2: recovering the pin using questions 
-        <>
-          <Text style={styles.sectionTitle}>Account Recovery</Text>
-          <Text style={styles.infoText}>{securityQuestion}</Text>
-          <InputField value={recoveryAnswer} onChangeText={setRecoveryAnswer} placeholder="Enter Answer" />
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                <PrimaryButton title="Save & Protect Vault" onPress={handleCreatePin} />
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <PrimaryButton title="Verify Answer" onPress={handleRecoveryUnlock} />
+                <Pressable onPress={() => setIsTypingNewPin(false)} style={styles.resetLink}>
+                  <Text style={styles.resetText}>← Back to Welcome</Text>
+                </Pressable>
+              </>
+            )}
+          </>
+        ) : (
 
-          <Pressable onPress={() => setIsRecoveryMode(false)} style={styles.resetLink}>
-            <Text style={styles.resetText}>Back to PIN</Text>
-          </Pressable>
-        </>
-      ) : (
-        //case 3: just logging back in 
-        <>
-          <Text style={styles.sectionTitle}>Unlock Vault</Text>
-          <InputField value={pin} onChangeText={setPin} placeholder="Enter PIN" secureTextEntry />
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <PrimaryButton title="Unlock" onPress={handleUnlock} />
+          /* case 2: returning user!! */
+          <>
+            {!isRecoveringPin ? (
 
-          <Pressable onPress={() => setIsRecoveryMode(true)} style={styles.resetLink}>
-            <Text style={styles.resetText}>Forgot PIN? Answer Security Question</Text>
-          </Pressable>
+              /* normal unlock screen */
+              <>
+                <Text style={styles.sectionTitle}>Unlock Vault</Text>
+                <InputField value={pin} onChangeText={setPin} placeholder="Enter PIN" secureTextEntry />
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                <PrimaryButton title="Unlock" onPress={handleUnlock} />
 
-          <Pressable onPress={handleResetVault} style={styles.resetLink}>
-            <Text style={[styles.resetText, { color: '#C53030', marginTop: 10 }]}>Reset PIN and Wipe Vault</Text>
-          </Pressable>
-        </>
-      )}
-      </View> 
+                <Pressable onPress={() => setIsRecoveringPin(true)} style={styles.resetLink}>
+                  <Text style={styles.resetText}>Forgot PIN?</Text>
+                </Pressable>
+              </>
+            ) : (
+              /* recovery screen */
+              <>
+                <Text style={styles.sectionTitle}>Recovery</Text>
+                <Text style={styles.infoText}>{securityQuestion}</Text>
+                <InputField value={recoveryAnswer} onChangeText={setRecoveryAnswer} placeholder="Enter Answer" />
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                <PrimaryButton title="Verify Answer" onPress={handleRecoveryUnlock} />
+
+                <Pressable onPress={() => setIsRecoveringPin(false)} style={styles.resetLink}>
+                  <Text style={styles.resetText}>← Back to Login</Text>
+                </Pressable>
+
+                {/* wipe data button moved here to prevent accidental clicks */}
+                <Pressable onPress={handleResetVault} style={styles.resetLink}>
+                  <Text style={[styles.resetText, { color: '#C53030', marginTop: 15 }]}>Reset PIN and Wipe Vault</Text>
+                </Pressable>
+              </>
+            )}
+          </>
+        )}
+      </View>
 
       <View style={styles.infoCard}>
         <Text style={styles.infoTitle}>Privacy Note</Text>
@@ -252,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resetText: {
-    color: '#718096', // Subtle gray
+    color: '#718096', 
     textDecorationLine: 'underline',
     fontSize: 14,
   },

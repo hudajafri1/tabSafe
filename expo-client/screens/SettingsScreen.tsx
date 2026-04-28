@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Pressable, ScrollView } from "react-native";
 import TopNavTabs from "../components/TopNavTabs";
 import { AppSettings } from "../models/Settings";
 import { getSettings, updateSettings } from "../logic/settingsLogic";
+import PrimaryButton from "../components/PrimaryButton";
 
 type SettingsScreenProps = {
   onBack: () => void;
@@ -10,6 +11,7 @@ type SettingsScreenProps = {
   onGoAdd: () => void;
   onGoHistory: () => void;
   onGoSettings: () => void;
+  onLogout: () => void;
 };
 
 export default function SettingsScreen({
@@ -18,6 +20,7 @@ export default function SettingsScreen({
   onGoAdd,
   onGoHistory,
   onGoSettings,
+  onLogout
 }: SettingsScreenProps) {
   const [settings, setSettings] = useState<AppSettings | null>(null);
 
@@ -143,6 +146,14 @@ export default function SettingsScreen({
         <Pressable style={styles.optionButton} onPress={handleToggleBackup}>
           <Text style={styles.optionButtonText}>Toggle Backup</Text>
         </Pressable>
+      </View>
+
+      <View style={{ padding: 20, marginTop: 20 }}>
+        <PrimaryButton 
+          title="Log Out & Lock Account" 
+          onPress={onLogout} 
+          color="#C53030" 
+        />
       </View>
 
       <Pressable style={styles.secondaryButton} onPress={onBack}>
