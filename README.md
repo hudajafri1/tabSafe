@@ -7,7 +7,7 @@ TabSafe is a privacy-first medication tracking web app built for people who want
 
 - [Running the App](#running-the-app)
 - [Project Structure](#project-structure)
-- [About the `client/` Folder](#Brief:-the-client-folder)
+- [Brief: the `client/` Folder](#Brief:-the-client-folder)
 - [Encryption & Security](#encryption--security)
 - [Future Security Improvements](#future-security-improvements)
 
